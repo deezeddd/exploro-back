@@ -1,5 +1,7 @@
 # flask --app api run -> Command to run FLask app
+import datetime
 import json
+import random
 from flask import Flask, jsonify, request
 from connection import create_supabase_client
 
@@ -13,4 +15,40 @@ def hello():
     print(response)
     return response
 
+@app.route("/posttest", methods=["GET"])
+def postTest():
+    if request.method != 'GET':
+        return "Error"
+    id = random.randint(1, 100)
+    
+    name = "Yodo " + str(id)
+    data = {'name': name, 'id': id, "created_at": str(datetime.datetime.now())}
+    response = supabase.table('yodo').insert(data).execute()
+
+    return jsonify(response.data)   
+
+
+@app.route("/post", methods=["GET"])
+def post():
+    if request.method != 'GET':
+        return "Error"
+    
+    # Get data from URL parameters
+    id = request.args.get('id', default=random.randint(1, 100), type=int)
+    
+    name = request.args.get('name', default="Yodo " + str(id), type=str)
+
+    response = supabase.table('yodo').select('id').eq('id', id).execute()
+    if response.data:
+        # ID already exists
+        return jsonify({"error": "ID already exists"}), 400
+
+    # Prepare data
+    data = {'name': name, 'id': id, "created_at": str(datetime.datetime.now())}
+    
+    # Insert data into Supabase table
+    response = supabase.table('yodo').insert(data).execute()
+
+    # Return the response data as JSON
+    return jsonify(response.data)
 
