@@ -78,9 +78,7 @@ def put():
 
 @app.route("/delete", methods=["GET"])
 def delete():
-    if request.method != 'GET':
-        return "Error"
-    
+
     # Get data from URL parameters
     id = request.args.get('id', type=int)
     
@@ -89,10 +87,10 @@ def delete():
         # ID already exists
         return jsonify({"error": "ID doesn't exists"}), 400
     else: 
-        response = supabase.table('yodo').delete(id).eq('id', id).execute()
+        response = supabase.table('yodo').delete().eq('id', id).execute()
    
 
     # Return the response data as JSON
-    return jsonify(response.data)
+    return jsonify(response.data, "Deleted")
 
 
